@@ -1,0 +1,30 @@
+/*  Uses fixed dimensions of squares
+    This will need to be adjusted for responsive versions
+*/  
+
+.squareStyle {
+	 height: 20px;
+	 width: 20px;
+	 margin: 0px;
+	 display: inline-block;
+	 border: solid 3px white;
+ }
+ 
+ .rowStyle {
+     height: 26px;
+     margin: 0px;
+     padding: 0px;
+ }
+ 
+ #puzzleFlip {
+	 background-color: #ffffdd;
+	 padding: 100px;
+ }
+ 
+ .writing {
+	 font-size: 2em;
+ }
+ 
+ .highlight {
+     border: solid 3px #888888;
+ }

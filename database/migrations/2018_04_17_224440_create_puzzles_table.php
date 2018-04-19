@@ -22,7 +22,6 @@ class CreatePuzzlesTable extends Migration
             $table->integer('total_solve_time');
             $table->text('pattern_json');
             $table->text('level_json');
-            $table->integer('player_id');
         });
     }
 

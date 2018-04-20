@@ -1,4 +1,4 @@
-@extends('master')
+@extends('layouts/master')
 
 @section('title')
     WindowPanes | Single Game
@@ -7,12 +7,12 @@
 @section('content')
 	<p>Click and drag within grid of colored squares to select an area.
 		Click "Flip" to flip your selection.</p>
-	<button id="btnStart" class="writing">Start New Game</button>
+	<button id="btnStart" class="btn btn-primary" class="writing">Start New Game</button>
 	<h2 id="levelLabel"></h2>
 	<div id="displayFlip" class="writing">No selection</div>
 	<div id="puzzleFlip"></div>
-	<button id="btnFlip" class="writing">Flip</button>
-	<button id="btnReset" class="writing">Reset</button>
+	<button id="btnFlip" class="btn btn-primary" class="writing">Flip</button>
+	<button id="btnReset" class="btn btn-primary" class="writing">Reset</button>
 @endsection
 
 @push('body')

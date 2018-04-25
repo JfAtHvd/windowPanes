@@ -4,11 +4,10 @@
 //  Can be adjusted as necessary
 var MAX_WIDTH = 16;
 var MAX_HEIGHT = 16;
-var HUE_RANGE = 150;
 var MAX_LIGHTNESSS = 80;
-var MIN_LIGHTNESSS = 15;
+var MIN_LIGHTNESSS = 23;
 
-var hueRatio = HUE_RANGE / 90;
+//var hueRatio = HUE_RANGE / 90;
 var lightnessRadius = (MAX_WIDTH + MAX_HEIGHT) / 8;
 
 //  Center constraint keeps center of color wheel from being too close to any edge.
@@ -18,6 +17,9 @@ var yCenterConstraint = MAX_HEIGHT * 0.75;
 var puzzleFlip = document.getElementById("puzzleFlip");
 var displayFlip = document.getElementById("displayFlip");
 var levelLabel = document.getElementById("levelLabel");
+var btnFlip = document.getElementById("btnFlip");
+var btnReset = document.getElementById("btnReset");
+var btnStart = document.getElementById("btnStart");
 
 var puzzleObj = {};
 //  Initiate puzzleObj.
@@ -50,10 +52,6 @@ var axisVert;
 var directionToFlip;
 
 var levelNumber = 1;
-
-var btnFlip = document.getElementById("btnFlip");
-var btnReset = document.getElementById("btnReset");
-var btnStart = document.getElementById("btnStart");
 
 function executeFlip(){
     if (directionToFlip === "horiz"){
@@ -118,19 +116,12 @@ function setRandomPattern() {
     patternNumbers.yOffset = (yCenterConstraint / 2) - Math.floor(yCenterConstraint * Math.random());
   
     //  This prevents center of color wheel aligning too closely with center of grid
-    //  THIS ALSO FEELS LIKE IT COULD BE DONE MORE EFFICIENTLY!
-    //  TAKE ANOTHER LOOK AND SEE IF THIS IS TRUE!
     if (Math.abs(patternNumbers.xOffset) < MAX_WIDTH / 10){
         while(Math.abs(patternNumbers.yOffset) < MAX_HEIGHT / 10){
             patternNumbers.yOffset = (yCenterConstraint / 2) 
                     - Math.floor(yCenterConstraint * Math.random());
         }
     }
-  
-    //  This chunk was my original.  Did not have offsets, and also used specific numbers
-    //  based on grid size of 10 x 10.
-    /*var xOffset = 4 - Math.floor(9*Math.random());
-    var yOffset = 4 - Math.floor(9*Math.random());*/
   
     patternNumbers.hueOriginAngle = 360 * Math.random();
     patternNumbers.hueOriginal = 360 * Math.random();
@@ -179,41 +170,10 @@ function makeArray() {
             }
             
             var angleDeg = (angleRad * 360) / (2 * Math.PI);
-            var deltaAngleDeg = angleDeg - patternNumbers.hueOriginAngle;
-            if (deltaAngleDeg < 0){
-                deltaAngleDeg = 360 + deltaAngleDeg;
+            var newHue = angleDeg + patternNumbers.hueOriginAngle;
+            if (newHue > 360){
+                newHue = newHue - 360;
             }
-            
-            var adjustedAngle = Math.abs(90 - Math.abs(180 - deltaAngleDeg));
-            
-            //  This version gives full color wheel:
-            /*
-            var newHue = (angle * 360) / (2 * Math.PI);
-            */
-            //var newHue = angleDeg;
-           
-            var newHue = patternNumbers.hueOriginal + (adjustedAngle * hueRatio);
-            
-            //  This was original:
-            
-            //  Test this use of centerConstraint in pythagorean theorem.
-            //  It might be OK, but might fail when center is at corner of constraints.
-            //  var maxHypotenuse = Math.sqrt(xCenterConstraint * xCenterConstraint 
-            //        + yCenterConstraint * yCenterConstraint);
-                    
-            //var lightnessRatio = hypotenuse / maxHypotenuse;
-            //var newLightness = 35 + parseInt(2 * Math.abs(0.5 - lightnessRatio) * 60, 10);
-            
-            
-            //  And this was intermediate:
-            //var lightnessRatio = (hypotenuse % lightnessRadius) / lightnessRadius;
-            //var newLightness = 35 + lightnessRatio * 60;
-            
-            
-            //  *** Right now lightness radius is hardcoded above.
-            //      Should it be calculated relative to something else?
-            //      Maybe it is good, because it is already relative to MAX_H & MAX_L
-            //  lightnessRadius ... do something here?
             
             var adjustedHypotenuse = hypotenuse % (2 * lightnessRadius);
             var lightnessRatio = 
@@ -224,15 +184,9 @@ function makeArray() {
             newSquareObj.hslColor = "hsl(" + newHue + ", 100%, " + newLightness + "%)";
             newSquareObj.winningI = i;
             newSquareObj.winningJ = j;
-            //console.log("newLightness = " + newLightness);
-            //console.log("newHue = " + newHue);
-            //console.log("adjustedAngle = " + adjustedAngle);
-            //console.log("hueRatio = " + hueRatio);
-            //console.log(puzzleObj);
             puzzleObj[i][j] = newSquareObj;
         }
     }
-    //console.log("hueOriginAngle = " + patternNumbers.hueOriginAngle);
 }
 
 function drawPuzzle(){
@@ -257,11 +211,7 @@ function drawPuzzle(){
                     axisVert = axisVertSelected;
                 });
             })();
-        }   
-        
-        // This son of a bitch was the culprit the whole time!!!@!!
-        //newRow.innerHTML += "<br/>";
-                
+        }         
         puzzleFlip.appendChild(newRow);
     }
     if(checkForWin()){

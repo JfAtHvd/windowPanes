@@ -10,7 +10,7 @@ class PuzzleController extends Controller
 	/**
 	* GET /singlegame
 	*/
-    public function singleGame() {
-        return view('singleGame');
+    public function play() {
+        return view('play');
 	}
 }

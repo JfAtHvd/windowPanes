@@ -11,15 +11,19 @@
 |
 */
 
+/*
 Route::get('/', function () {
     return view('welcome');
 });
+*/
 
-Route::get('/singlegame', 'PuzzleController@singleGame');
+Route::get('/', 'HomeController@index')->name('home');
+
+Route::get('/play', 'PuzzleController@play');
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index');
 
 Route::get('/debug', function() {
 

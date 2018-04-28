@@ -1,7 +1,7 @@
-@extends('layouts/master')
+@extends('layouts.master')
 
 @section('title')
-    WindowPanes | Single Game
+    WindowPanes | Play
 @endsection
 		
 @section('content')

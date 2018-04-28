@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
+//  https://laravel.com/docs/5.6/requests
+use Illuminate\Http\Request;
+
 class LoginController extends Controller
 {
     /*
@@ -18,7 +21,11 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    //  Source:
+    //  https://stackoverflow.com/questions/39327970/how-to-set-laravel-5-3-logout-redirect-path
+    use AuthenticatesUsers{
+		logout as performLogout;
+	}
 
     /**
      * Where to redirect users after login.
@@ -36,4 +43,13 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+    
+    //  Source:
+    //  https://stackoverflow.com/questions/39327970/how-to-set-laravel-5-3-logout-redirect-path
+    public function logout(Request $request)
+	{
+		$this->performLogout($request);
+		return redirect()->route('home');
+	}
+    
 }

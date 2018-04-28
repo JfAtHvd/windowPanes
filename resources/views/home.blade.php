@@ -1,23 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.master')
 
 @section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Dashboard</div>
-
-                <div class="panel-body">
-                    @if (session('status'))
-                        <div class="alert alert-success">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    You are logged in!
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    @if(Auth::check())
+        <div>Player's name goes here</div>
+        <a href="{{ action('PuzzleController@play') }}">Play</a>
+        <div>Player's highest level goes here</div>
+        <div>Player's fastest times go here</div>
+    @else
+        <a href="{{ route('login') }}">Login</a>
+        <a href="{{ route('register') }}">Register</a>
+        <a href="{{ action('PuzzleController@play') }}">Play as Guest</a>
+    @endif
 @endsection

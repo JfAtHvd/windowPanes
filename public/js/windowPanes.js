@@ -20,6 +20,9 @@ var levelLabel = document.getElementById("levelLabel");
 var btnFlip = document.getElementById("btnFlip");
 var btnReset = document.getElementById("btnReset");
 //var btnStart = document.getElementById("btnStart");
+var timerSpan = document.getElementById("timerSpan");
+var gameControls = document.getElementById("gameControls");
+var winReport = document.getElementById("winReport");
 
 var puzzleObj = {};
 //  Initiate puzzleObj.
@@ -52,6 +55,12 @@ var axisVert;
 var directionToFlip;
 
 var levelNumber = 1;
+
+var timer;
+var totalTime;
+var timerId;
+var resets;
+
 
 function executeFlip(){
     if (directionToFlip === "horiz"){
@@ -215,10 +224,14 @@ function drawPuzzle(){
         puzzleFlip.appendChild(newRow);
     }
     if(checkForWin()){
-        if(confirm("Complete! Proceed to next level...")){
-			levelNumber += 1;
-			startNewLevel(levelNumber);
-        }
+        gameControls.style.visibility = "hidden";
+        winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+formatTime(totalTime)+"\nNumber of resets: "+
+                resets+"\nClick to proceed to next level...";
+        setTimeout(function(){
+            document.addEventListener("click", goToNextLevel);
+        }, 500);
+    } else {
+        document.removeEventListener("click", goToNextLevel);
     }
 }
 
@@ -227,6 +240,8 @@ function resetPuzzle(){
     makeArray();
     mixUpPuzzle()
     drawPuzzle();
+    resetTimer();
+    resets++;
 }
 
 function startNewLevel(levelNumber) {
@@ -236,6 +251,16 @@ function startNewLevel(levelNumber) {
 	mixUpPuzzle();
 	drawPuzzle();
 	levelLabel.innerHTML = "Level " + levelNumber;
+    startNewTimer();
+    resets = 0;
+    gameControls.style.visibility = "visible";
+    winReport.textContent = 'Click and drag within grid of colored squares to select an area.'+
+			'Click "Flip" to flip your selection.';
+}
+
+function goToNextLevel(){
+    levelNumber += 1;
+    startNewLevel(levelNumber);
 }
 
 function mixUpPuzzle() {
@@ -274,6 +299,7 @@ Sources:
     https://developer.mozilla.org/en-US/docs/Web/Events/mousedown
     https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/screenX
 */
+//document.addEventListener("mousedown", function (evt) {
 puzzleFlip.addEventListener("mousedown", function (evt) {
     evt.preventDefault();
     xMouseDown = evt.screenX;
@@ -375,8 +401,81 @@ function removeHighlights() {
 	}
 }
 
+function startNewTimer(){
+    timer = 0;
+    totalTime = 0;
+	timerId = setInterval(function(){
+		timerSpan.textContent = "Time " + formatTime(timer);
+		timer++;
+	},1000);
+}
 
-(function(){
+
+function resetTimer(){
+    totalTime += timer;
+    timer = 0;
+    clearInterval(timerId);
+    timerId = setInterval(function(){
+		timerSpan.textContent = "Time " + formatTime(timer);
+		timer++;
+	},1000);
+}
+
+function clearTimer(){
+    clearInterval(timerId);
+}
+
+
+
+//  Return time in seconds to a formatted string in minutes and seconds.
+function formatTime(t){
+	var minutes = Math.floor(t / 60);
+	var seconds = (t % 60).toString();
+	if(seconds.length == 1){
+		seconds = "0" + seconds;
+	}
+	return minutes + ":" + seconds;
+}
+
+
+
+function startGame(){
     levelNumber = 1;
     startNewLevel(levelNumber);
-})();
+}
+
+startGame();
+
+
+
+
+/*
+timerId = setInterval(function(){
+			timerSpan.textContent = "Time " + formatTime(timer);
+			timer++;
+		},1000);
+		
+		The setInterval() method will continue calling the function until clearInterval() is called, or the window is closed.
+*/		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

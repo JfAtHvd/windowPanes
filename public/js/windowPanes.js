@@ -15,11 +15,11 @@ var xCenterConstraint = MAX_WIDTH * 0.75;
 var yCenterConstraint = MAX_HEIGHT * 0.75;
 
 var puzzleFlip = document.getElementById("puzzleFlip");
-var displayFlip = document.getElementById("displayFlip");
+//var displayFlip = document.getElementById("displayFlip");
 var levelLabel = document.getElementById("levelLabel");
 var btnFlip = document.getElementById("btnFlip");
 var btnReset = document.getElementById("btnReset");
-var btnStart = document.getElementById("btnStart");
+//var btnStart = document.getElementById("btnStart");
 
 var puzzleObj = {};
 //  Initiate puzzleObj.
@@ -84,7 +84,7 @@ function flipVertAtAxis(axisNumber) {
 		clearSelection();
     } else {
         clearSelection();
-        displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
+        //displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
     }
 }
 
@@ -105,7 +105,7 @@ function flipHorizAtAxis(axisNumber) {
 		clearSelection();
     } else {
         clearSelection();
-        displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
+        //displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
     }
 }
 
@@ -203,13 +203,13 @@ function drawPuzzle(){
             newSquare.style.backgroundColor = puzzleObj[i][j].hslColor;
             newRow.appendChild(newSquare);
             (function(){
-                var axisHorizSelected = i;
-                var axisVertSelected = j;
-                newSquare.addEventListener("mousedown", function(){
-                    console.log("axisHorizSelected="+axisHorizSelected+",axisVertSelected="+axisVertSelected);
-                    axisHoriz = axisHorizSelected;
-                    axisVert = axisVertSelected;
-                });
+				var axisHorizSelected = i;
+				var axisVertSelected = j;
+				newSquare.addEventListener("mousedown", function(){
+					console.log("axisHorizSelected="+axisHorizSelected+",axisVertSelected="+axisVertSelected);
+					axisHoriz = axisHorizSelected;
+					axisVert = axisVertSelected;
+				});
             })();
         }         
         puzzleFlip.appendChild(newRow);
@@ -275,11 +275,14 @@ Sources:
     https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/screenX
 */
 puzzleFlip.addEventListener("mousedown", function (evt) {
+    evt.preventDefault();
     xMouseDown = evt.screenX;
     yMouseDown = evt.screenY;
     console.log("mousedown at screen coordinates (" + xMouseDown + "," + yMouseDown + ")");
 });
 
+//  Using document creates a bizzarre bug where it always flips horizontally. Why?
+//document.addEventListener("mouseup", function (evt) {
 puzzleFlip.addEventListener("mouseup", function (evt) {
     xMouseUp = evt.screenX;
     yMouseUp = evt.screenY;
@@ -298,10 +301,12 @@ puzzleFlip.addEventListener("mouseup", function (evt) {
 });
 
 btnReset.addEventListener("click", resetPuzzle);
+/*
 btnStart.addEventListener("click", function(){
     levelNumber = 1;
     startNewLevel(levelNumber);
 });
+*/
 
 
 //  Screen coordinates, 
@@ -309,31 +314,35 @@ btnStart.addEventListener("click", function(){
 //
 //  What is minimum for deltaX or deltaY?  Play with this and find sweet spot.
 function testSelection() {
-    console.log("Test selection");
-    var deltaX = xMouseUp - xMouseDown;
-    var deltaY = yMouseUp - yMouseDown;
-    console.log("deltaX="+deltaX+" ,deltaY="+deltaY);
-    if(deltaX >= 50 && Math.abs(deltaX/deltaY) > 2){
-        console.log("Selected from vertical axis "+axisVert);
-        displayFlip.innerHTML = "Selected from vertical axis "+axisVert;
-        directionToFlip = "vert";
-        return true;
-    } else if(deltaY >= 50 && Math.abs(deltaY/deltaX) > 2){
-        console.log("Selected from horizontal axis "+axisHoriz);
-        displayFlip.innerHTML = "Selected from horizontal axis "+axisHoriz;
-        directionToFlip = "horiz";
-        return true;
-    } else {
-        clearSelection();
-        return false;
-    }
+    console.log("Test selection");	
+	removeHighlights();
+	var deltaX = xMouseUp - xMouseDown;
+	var deltaY = yMouseUp - yMouseDown;
+	console.log("deltaX="+deltaX+" ,deltaY="+deltaY);
+	if(deltaX >= 20 && Math.abs(deltaX/deltaY) > 2){
+	    if(axisVert > 0){
+			console.log("Selected from vertical axis "+axisVert);
+			//displayFlip.innerHTML = "Selected from vertical axis "+axisVert;
+			directionToFlip = "vert";
+			return true;
+		}
+	} else if(deltaY >= 20 && Math.abs(deltaY/deltaX) > 2){
+	    if(axisHoriz > 0){
+			console.log("Selected from horizontal axis "+axisHoriz);
+			//displayFlip.innerHTML = "Selected from horizontal axis "+axisHoriz;
+			directionToFlip = "horiz";
+			return true;
+		}
+	}
+	clearSelection();
+	return false;
 }
 
 function clearSelection() {
     directionToFlip = null;
     axisHoriz = null;
     axisVert = null;
-    displayFlip.innerHTML = "No selection";
+    //displayFlip.innerHTML = "No selection";
     btnFlip.removeEventListener("click", executeFlip);
     console.log("Remove event listener from flip button.");
     removeHighlights();
@@ -343,6 +352,7 @@ function addHighlights() {
     if (directionToFlip == "vert") {
         for (var i = 0; i < MAX_HEIGHT; i++) {
             for (var j = axisVert; j < MAX_WIDTH; j++) {
+                console.log("i="+i+",j="+j+",squareArray[i][j]="+squareArray[i][j]);
                 squareArray[i][j].classList.add("highlight");             
             }
         }
@@ -366,5 +376,7 @@ function removeHighlights() {
 }
 
 
-
-
+(function(){
+    levelNumber = 1;
+    startNewLevel(levelNumber);
+})();

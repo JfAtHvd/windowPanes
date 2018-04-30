@@ -402,6 +402,7 @@ function removeHighlights() {
 }
 
 function startNewTimer(){
+    clearTimer()
     timer = 0;
     totalTime = 0;
 	timerId = setInterval(function(){
@@ -414,7 +415,7 @@ function startNewTimer(){
 function resetTimer(){
     totalTime += timer;
     timer = 0;
-    clearInterval(timerId);
+    clearTimer();
     timerId = setInterval(function(){
 		timerSpan.textContent = "Time " + formatTime(timer);
 		timer++;
@@ -423,6 +424,7 @@ function resetTimer(){
 
 function clearTimer(){
     clearInterval(timerId);
+    timerSpan.textContent = null;
 }
 
 

@@ -18,6 +18,11 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            
+            //  My additions:
+            $table->integer('highest_level')->nullable();
+            $table->string('fastest_times_json')->nullable();
+            
             $table->rememberToken();
             $table->timestamps();
         });

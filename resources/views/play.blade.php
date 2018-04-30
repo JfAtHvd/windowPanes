@@ -21,7 +21,16 @@
 		</div>
 		<!--<div id="winReport"></div>-->
 	</div>
-	
+	<div id="hiddenForm">
+		<form id="saveDataForm" method='POST' action='/save'>
+			{{ csrf_field() }}
+            <input type='text' name='level' id='level'>
+            <input type='text' name='solve_time' id='solve_time'>
+            <input type='text' name='total_solve_time' id='total_solve_time'>
+			<input type='text' name='pattern_json' id='pattern_json'>
+			<input type='text' name='level_json' id='level_json'>
+		</form>
+	</div>
 @endsection
 
 @push('body')

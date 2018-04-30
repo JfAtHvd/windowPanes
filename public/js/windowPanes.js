@@ -24,6 +24,16 @@ var timerSpan = document.getElementById("timerSpan");
 var gameControls = document.getElementById("gameControls");
 var winReport = document.getElementById("winReport");
 
+//  HTML form and its inputs
+var saveDataForm = document.getElementById("saveDataForm");
+var level = document.getElementById("level");
+var solve_time = document.getElementById("solve_time");
+var total_solve_time = document.getElementById("total_solve_time");
+var pattern_json = document.getElementById("pattern_json");
+var level_json = document.getElementById("level_json");
+
+
+
 var puzzleObj = {};
 //  Initiate puzzleObj.
 //  Is this actually necessary??  It might not be
@@ -48,7 +58,7 @@ var patternNumbers = {
     "hueOriginAngle" : null,
     "hueOriginal" : null
 };
-var flipsForThisLevel = [];
+var flipsForThisLevel = {};
 
 var axisHoriz;
 var axisVert;
@@ -137,7 +147,7 @@ function setRandomPattern() {
 }
 
 function setRandomFlips(levelNumber) {
-    flipsForThisLevel = [];
+    flipsForThisLevel = {};
     console.log("Setting flips for level " + levelNumber);
     var direction;
     var axis;
@@ -152,12 +162,12 @@ function setRandomFlips(levelNumber) {
         } else {
             axis = Math.floor(Math.random() * (MAX_WIDTH - 1)) + 1;
         }
-        flipsForThisLevel.push({
+        flipsForThisLevel[i] = {
             "direction" : direction,
             "axis" : axis
-        });
+        };
     }
-    console.log("flipsForThisLevel[] = " + flipsForThisLevel);
+    console.log(flipsForThisLevel);
 }
 
 function makeArray() {   
@@ -224,12 +234,20 @@ function drawPuzzle(){
         puzzleFlip.appendChild(newRow);
     }
     if(checkForWin()){
+        executePuzzleForm();
+        
+        
+        
+        /*
         gameControls.style.visibility = "hidden";
         winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+formatTime(totalTime)+"\nNumber of resets: "+
                 resets+"\nClick to proceed to next level...";
         setTimeout(function(){
             document.addEventListener("click", goToNextLevel);
         }, 500);
+        */
+        
+        
     } else {
         document.removeEventListener("click", goToNextLevel);
     }
@@ -263,19 +281,56 @@ function goToNextLevel(){
     startNewLevel(levelNumber);
 }
 
+function executePuzzleForm(){
+    //
+    clearInterval(timerId);
+    //
+    level.value = levelNumber;
+    solve_time.value = timer;
+    if(totalTime == 0){
+        total_solve_time.value = timer;
+    } else {
+        total_solve_time.value = totalTime + timer;
+    }
+    pattern_json.value = JSON.stringify(patternNumbers);
+    level_json.value = JSON.stringify(flipsForThisLevel);
+    saveDataForm.submit();
+}
+/*   This is pre-object version:
 function mixUpPuzzle() {
-    for(var i = 0; i < flipsForThisLevel.length; i++){
-        if(flipsForThisLevel[i].direction === "horiz"){
-            flipHorizAtAxis(flipsForThisLevel[i].axis);
-            console.log("Mix direction: " + flipsForThisLevel[i].direction + ", axis: " + flipsForThisLevel[i].axis);
-        } else if(flipsForThisLevel[i].direction === "vert"){
-            flipVertAtAxis(flipsForThisLevel[i].axis);
-            console.log("Mix direction: " + flipsForThisLevel[i].direction + ", axis: " + flipsForThisLevel[i].axis);
-        } else {
-            console.log("Error, direction = " + flipsForThisLevel[i].direction);
-        }        
+    //for(var i = 0; i < flipsForThisLevel.length; i++){
+    for (var flip in flipsForThisLevel) {
+		if (flipsForThisLevel.hasOwnProperty(flip)) {
+			if(flipsForThisLevel[i].direction === "horiz"){
+				flipHorizAtAxis(flipsForThisLevel[i].axis);
+				console.log("Mix direction: " + flipsForThisLevel[i].direction + ", axis: " + flipsForThisLevel[i].axis);
+			} else if(flipsForThisLevel[i].direction === "vert"){
+				flipVertAtAxis(flipsForThisLevel[i].axis);
+				console.log("Mix direction: " + flipsForThisLevel[i].direction + ", axis: " + flipsForThisLevel[i].axis);
+			} else {
+				console.log("Error, direction = " + flipsForThisLevel[i].direction);
+			}        
+		}
     }
 }
+*/
+
+function mixUpPuzzle() {
+    for(var i = 0; i < levelNumber; i++){
+		var flip = flipsForThisLevel[i];
+		console.log(flip);
+		if(flip.direction === "horiz"){
+			flipHorizAtAxis(flip.axis);
+			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
+		} else if(flip.direction === "vert"){
+			flipVertAtAxis(flip.axis);
+			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
+		} else {
+			console.log("Error, direction = " + flip.direction);
+		}        
+    }
+}
+
 
 function checkForWin() {
     for (var i = 0; i < MAX_HEIGHT; i++){
@@ -414,6 +469,7 @@ function startNewTimer(){
 
 function resetTimer(){
     totalTime += timer;
+    console.log(totalTime);
     timer = 0;
     clearTimer();
     timerId = setInterval(function(){

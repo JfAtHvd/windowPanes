@@ -21,6 +21,8 @@ Route::get('/', 'HomeController@index')->name('home');
 
 Route::get('/play', 'PuzzleController@play');
 
+Route::post('/save', 'PuzzleController@savePuzzleData');
+
 Auth::routes();
 
 Route::get('/home', 'HomeController@index');

@@ -234,20 +234,16 @@ function drawPuzzle(){
         puzzleFlip.appendChild(newRow);
     }
     if(checkForWin()){
-        executePuzzleForm();
-        
-        
-        
-        /*
-        gameControls.style.visibility = "hidden";
-        winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+formatTime(totalTime)+"\nNumber of resets: "+
-                resets+"\nClick to proceed to next level...";
-        setTimeout(function(){
-            document.addEventListener("click", goToNextLevel);
-        }, 500);
-        */
-        
-        
+        if(saveDataForm){
+            executePuzzleForm();
+        } else {
+			gameControls.style.visibility = "hidden";
+			winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+formatTime(totalTime)+"\nNumber of resets: "+
+					resets+"\nClick anywhere to proceed to next level...";
+			setTimeout(function(){
+				document.addEventListener("click", goToNextLevel);
+			}, 500);        
+        }        
     } else {
         document.removeEventListener("click", goToNextLevel);
     }
@@ -296,24 +292,6 @@ function executePuzzleForm(){
     level_json.value = JSON.stringify(flipsForThisLevel);
     saveDataForm.submit();
 }
-/*   This is pre-object version:
-function mixUpPuzzle() {
-    //for(var i = 0; i < flipsForThisLevel.length; i++){
-    for (var flip in flipsForThisLevel) {
-		if (flipsForThisLevel.hasOwnProperty(flip)) {
-			if(flipsForThisLevel[i].direction === "horiz"){
-				flipHorizAtAxis(flipsForThisLevel[i].axis);
-				console.log("Mix direction: " + flipsForThisLevel[i].direction + ", axis: " + flipsForThisLevel[i].axis);
-			} else if(flipsForThisLevel[i].direction === "vert"){
-				flipVertAtAxis(flipsForThisLevel[i].axis);
-				console.log("Mix direction: " + flipsForThisLevel[i].direction + ", axis: " + flipsForThisLevel[i].axis);
-			} else {
-				console.log("Error, direction = " + flipsForThisLevel[i].direction);
-			}        
-		}
-    }
-}
-*/
 
 function mixUpPuzzle() {
     for(var i = 0; i < levelNumber; i++){
@@ -382,13 +360,6 @@ puzzleFlip.addEventListener("mouseup", function (evt) {
 });
 
 btnReset.addEventListener("click", resetPuzzle);
-/*
-btnStart.addEventListener("click", function(){
-    levelNumber = 1;
-    startNewLevel(levelNumber);
-});
-*/
-
 
 //  Screen coordinates, 
 //  AKA Right corresponds to X increasing and Down corresponds to Y increasing
@@ -403,14 +374,12 @@ function testSelection() {
 	if(deltaX >= 20 && Math.abs(deltaX/deltaY) > 2){
 	    if(axisVert > 0){
 			console.log("Selected from vertical axis "+axisVert);
-			//displayFlip.innerHTML = "Selected from vertical axis "+axisVert;
 			directionToFlip = "vert";
 			return true;
 		}
 	} else if(deltaY >= 20 && Math.abs(deltaY/deltaX) > 2){
 	    if(axisHoriz > 0){
 			console.log("Selected from horizontal axis "+axisHoriz);
-			//displayFlip.innerHTML = "Selected from horizontal axis "+axisHoriz;
 			directionToFlip = "horiz";
 			return true;
 		}
@@ -423,7 +392,6 @@ function clearSelection() {
     directionToFlip = null;
     axisHoriz = null;
     axisVert = null;
-    //displayFlip.innerHTML = "No selection";
     btnFlip.removeEventListener("click", executeFlip);
     console.log("Remove event listener from flip button.");
     removeHighlights();
@@ -504,17 +472,7 @@ function startGame(){
 
 startGame();
 
-
-
-
-/*
-timerId = setInterval(function(){
-			timerSpan.textContent = "Time " + formatTime(timer);
-			timer++;
-		},1000);
-		
-		The setInterval() method will continue calling the function until clearInterval() is called, or the window is closed.
-*/		
+	
 		
 		
 		

@@ -5,6 +5,7 @@
 @endsection
 		
 @section('content')
+    
 	<div class="text-center">
 		<div id="winReport">Click and drag within grid of colored squares to select an area.
 			Click "Flip" to flip your selection.</div>
@@ -30,6 +31,10 @@
 			<input type='text' name='pattern_json' id='pattern_json'>
 			<input type='text' name='level_json' id='level_json'>
 		</form>
+		<div id="userLoginTrue"></div>
+		@if($new)
+            <div id="newGameTrue"></div>
+        @endif
 	@endauth
 @endsection
 

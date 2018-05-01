@@ -12,10 +12,17 @@ class PuzzleController extends Controller
 {
 
 	/**
+	* GET /play/new
+	*/
+    public function playNew() {
+        return view('play')->with('new', true);
+	}
+	
+	/**
 	* GET /play
 	*/
     public function play() {
-        return view('play');
+        return view('play')->with('new', false);
 	}
 	
 	/**

@@ -19,6 +19,8 @@ Route::get('/', function () {
 
 Route::get('/', 'HomeController@index')->name('home');
 
+Route::get('/play/new', 'PuzzleController@playNew');
+
 Route::get('/play', 'PuzzleController@play');
 
 Route::post('/save', 'PuzzleController@savePuzzleData');

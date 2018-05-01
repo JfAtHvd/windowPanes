@@ -78,6 +78,11 @@ var solve_time = document.getElementById("solve_time");
 var total_solve_time = document.getElementById("total_solve_time");
 var pattern_json = document.getElementById("pattern_json");
 var level_json = document.getElementById("level_json");
+//  This HTML div will exist if user is logged in, but will be undefined if not
+var userLoginTrue = document.getElementById("userLoginTrue");
+//  This HTML div will exist if user is redirected from home page, 
+//  but will be undefined if user is redirected from within game
+var newGameTrue = document.getElementById("newGameTrue");
 //  END OF VARIABLE DECLARATIONS
 
 
@@ -158,7 +163,7 @@ function setRandomFlips(levelNumber) {
             "direction" : direction,
             "axis" : axis
         };
-        for(var j = 0, j <= i, j++){
+        for(var j = 0; j <= i; j++){
             /*
             if( ****   Test if the flip has already been done.   ****){
             i--;
@@ -265,16 +270,7 @@ function drawPuzzle(){
         puzzleFlip.appendChild(newRow);
     }
     if(checkForWin()){  //  This could be put in its own function
-        if(saveDataForm){
-            executePuzzleForm();
-        } else {
-			gameControls.style.visibility = "hidden";
-			winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+formatTime(totalTime)+"\nNumber of resets: "+
-					resets+"\nClick anywhere to proceed to next level...";
-			setTimeout(function(){
-				document.addEventListener("click", goToNextLevel);
-			}, 500);        
-        }        
+        finishLevel();        
     } else {
         document.removeEventListener("click", goToNextLevel);
     }
@@ -357,19 +353,30 @@ function flipHorizAtAxis(axisNumber) {
 ***
 ******/
 /***
-*   Start a brand new game from Level 1
+*   Load game screen.  
+*   If user is not logged in, always starts from level one and same page increments levels
+*   If user logged in and starting new game, start from level one and clear localStorage
+*   If user logged in and not starting new game, pull level number from localStorage
 **/
-function startGame(){
-    levelNumber = 1;
+function loadGame(){
+    if(userLoginTrue){
+        if(newGameTrue){
+            localStorage.clear();
+            levelNumber = 1;
+        } else {
+            levelNumber = parseInt(localStorage.getItem('levelNumber'), 10);
+        }
+    } else {
+		levelNumber = 1;
+    }
     startNewLevel(levelNumber);
 }
 
 /***
-*   Keeping same values in patternNumbers and flipsForThisLevel, recreates current level
-*   as it was initially presented.  Adds 1 to the "resets" statistic
+*   Recreates current level as it was initially presented, keeping same values in 
+*   patternNumbers and flipsForThisLevel,   Adds 1 to the "resets" statistic
 **/
 function resetPuzzle(){
-    //console.log(puzzleObj);
     makePuzzleObject();
     mixUpPuzzle()
     drawPuzzle();
@@ -395,7 +402,8 @@ function startNewLevel(levelNumber) {
 }
 
 /***
-*   Increase the level number and start a new level
+*   Increase the level number and start a new level 
+*   For Guest users
 **/
 function goToNextLevel(){
     levelNumber += 1;
@@ -406,9 +414,7 @@ function goToNextLevel(){
 *   Set value for each form input to corresponding variable from level, and submit form
 **/
 function executePuzzleForm(){
-    //
     clearInterval(timerId);
-    //
     level.value = levelNumber;
     solve_time.value = timer;
     if(totalTime == 0){
@@ -418,6 +424,8 @@ function executePuzzleForm(){
     }
     pattern_json.value = JSON.stringify(patternNumbers);
     level_json.value = JSON.stringify(flipsForThisLevel);
+    levelNumber += 1;
+    localStorage.setItem('levelNumber', levelNumber);
     saveDataForm.submit();
 }
 
@@ -435,6 +443,24 @@ function checkForWin() {
         }
     }        
     return true;
+}
+
+/***
+*   If checkForWin is true, determine if user is logged in and proceed to next level 
+*   accordingly
+**/
+function finishLevel(){
+    if(userLoginTrue){
+		console.log(levelNumber);
+		executePuzzleForm();
+	} else {
+		gameControls.style.visibility = "hidden";
+		winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+formatTime(totalTime)+"\nNumber of resets: "+
+				resets+"\nClick anywhere to proceed to next level...";
+		setTimeout(function(){
+			document.addEventListener("click", goToNextLevel);
+		}, 500);        
+	}
 }
 //  END OF START LEVEL AND FINISH LEVEL FUNCTIONS
 
@@ -573,7 +599,7 @@ function formatTime(t){
 
 
 
-startGame();
+loadGame();
 
 	
 		

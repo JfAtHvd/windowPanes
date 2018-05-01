@@ -1,42 +1,26 @@
 "use strict";
 
-//  Constants
+
+/*****
+***     DECLARE ALL VARIABLES
+***
+******/
+//  CONSTANT_VARIABLES
 //  Can be adjusted as necessary
 var MAX_WIDTH = 16;
 var MAX_HEIGHT = 16;
 var MAX_LIGHTNESSS = 80;
 var MIN_LIGHTNESSS = 23;
+var MIN_MOUSE_DRAG = 20;
+var SELECT_ANGLE_RATIO = 2;
 
-//var hueRatio = HUE_RANGE / 90;
 var lightnessRadius = (MAX_WIDTH + MAX_HEIGHT) / 8;
-
 //  Center constraint keeps center of color wheel from being too close to any edge.
 var xCenterConstraint = MAX_WIDTH * 0.75;
 var yCenterConstraint = MAX_HEIGHT * 0.75;
 
-var puzzleFlip = document.getElementById("puzzleFlip");
-//var displayFlip = document.getElementById("displayFlip");
-var levelLabel = document.getElementById("levelLabel");
-var btnFlip = document.getElementById("btnFlip");
-var btnReset = document.getElementById("btnReset");
-//var btnStart = document.getElementById("btnStart");
-var timerSpan = document.getElementById("timerSpan");
-var gameControls = document.getElementById("gameControls");
-var winReport = document.getElementById("winReport");
-
-//  HTML form and its inputs
-var saveDataForm = document.getElementById("saveDataForm");
-var level = document.getElementById("level");
-var solve_time = document.getElementById("solve_time");
-var total_solve_time = document.getElementById("total_solve_time");
-var pattern_json = document.getElementById("pattern_json");
-var level_json = document.getElementById("level_json");
-
-
-
 var puzzleObj = {};
-//  Initiate puzzleObj.
-//  Is this actually necessary??  It might not be
+//  initialize puzzleObj
 for (var i = 0; i < MAX_HEIGHT; i++){
     puzzleObj[i] = {};
     for(var j = 0; j < MAX_WIDTH; j++){
@@ -45,6 +29,7 @@ for (var i = 0; i < MAX_HEIGHT; i++){
 }
 
 var squareArray = [];
+//  initialize squareArray
 for (var i = 0; i < MAX_HEIGHT; i++){
     squareArray[i] = [];
     for(var j = 0; j < MAX_WIDTH; j++){
@@ -56,96 +41,103 @@ var patternNumbers = {
     "xOffset" : null,
     "yOffset" : null,
     "hueOriginAngle" : null,
-    "hueOriginal" : null
 };
+
 var flipsForThisLevel = {};
 
 var axisHoriz;
 var axisVert;
 var directionToFlip;
 
-var levelNumber = 1;
+var xMouseDown;
+var yMouseDown;
+var xMouseUp;
+var yMouseUp;
+
+var levelNumber;
 
 var timer;
 var totalTime;
 var timerId;
 var resets;
 
+/***
+*   References to HTML elements:
+**/
+var puzzleFlip = document.getElementById("puzzleFlip");
+var levelLabel = document.getElementById("levelLabel");
+var btnFlip = document.getElementById("btnFlip");
+var btnReset = document.getElementById("btnReset");
+var timerSpan = document.getElementById("timerSpan");
+var gameControls = document.getElementById("gameControls");
+var winReport = document.getElementById("winReport");
+//  HTML form and its inputs:
+var saveDataForm = document.getElementById("saveDataForm");
+var level = document.getElementById("level");
+var solve_time = document.getElementById("solve_time");
+var total_solve_time = document.getElementById("total_solve_time");
+var pattern_json = document.getElementById("pattern_json");
+var level_json = document.getElementById("level_json");
+//  END OF VARIABLE DECLARATIONS
 
-function executeFlip(){
-    if (directionToFlip === "horiz"){
-        flipHorizAtAxis(axisHoriz);
+
+/***
+*   ADD EVENT LISTENERS TO HTML ELEMENTS
+*   Sources:  https://developer.mozilla.org/en-US/docs/Web/Events/mousedown  https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/screenX
+**/
+puzzleFlip.addEventListener("mousedown", function (evt) {
+//document.addEventListener("mousedown", function (evt) {
+    evt.preventDefault();
+    xMouseDown = evt.screenX;
+    yMouseDown = evt.screenY;
+    console.log("mousedown at screen coordinates (" + xMouseDown + "," + yMouseDown + ")");
+});
+
+puzzleFlip.addEventListener("mouseup", function (evt) {
+//document.addEventListener("mouseup", function (evt) {
+    xMouseUp = evt.screenX;
+    yMouseUp = evt.screenY;
+    if(testSelection()){
+        btnFlip.addEventListener("click", executeFlip);
+        //console.log("Add event listener to flip button. directionToFlip="+directionToFlip);
+        addHighlights();
+    } else {
         btnFlip.removeEventListener("click", executeFlip);
-        console.log("Remove event listener from flip button.");
-    } else if (directionToFlip === "vert"){
-        flipVertAtAxis(axisVert);
-        btnFlip.removeEventListener("click", executeFlip);
-        console.log("Remove event listener from flip button.");
-    } else {
-        console.log("Error! directionToFlip = "+directionToFlip);
+        //console.log("Remove event listener from flip button.");
     }
-}
+});
 
-function flipVertAtAxis(axisNumber) {
-    if (axisNumber > 0) {
-		//var axisNumber = parseInt(inputAxisNumber.value, 10);
-		console.log("Flip Vertical at axis "+axisNumber);
-		var maxI = MAX_HEIGHT -1;
-		var saveSquare;
-		for (var i = 0; i <= MAX_HEIGHT / 2; i++){
-			for (var j = axisNumber; j < MAX_WIDTH; j++){
-				saveSquare = puzzleObj[i][j];
-				puzzleObj[i][j] = puzzleObj[maxI - i][j];
-				puzzleObj[maxI - i][j] = saveSquare;
-			}
-		}
-		drawPuzzle();
-		clearSelection();
-    } else {
-        clearSelection();
-        //displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
-    }
-}
+btnReset.addEventListener("click", resetPuzzle);
+//  END OF ADD EVENT LISTENERS
 
-function flipHorizAtAxis(axisNumber) {
-    if (axisNumber > 0) {
-		//var axisNumber = parseInt(inputAxisNumber.value, 10);
-		console.log("Flip Horizontal at axis "+axisNumber);
-		var maxJ = MAX_WIDTH -1;
-		var saveSquare;
-		for (var i = axisNumber; i < MAX_HEIGHT; i++){
-			for (var j = 0; j < MAX_WIDTH / 2; j++){
-				saveSquare = puzzleObj[i][j];
-				puzzleObj[i][j] = puzzleObj[i][maxJ - j];
-				puzzleObj[i][maxJ - j] = saveSquare;
-			}
-		}
-		drawPuzzle();
-		clearSelection();
-    } else {
-        clearSelection();
-        //displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
-    }
-}
 
+/*****
+***     CREATE PUZZLE FUNCTIONS
+***
+******/
+/***
+*   Fill values in patternNumbers object with new random numbers
+**/
 function setRandomPattern() {
     //  Offset defines where center of color wheel lies
-    //      (x,y) offset of (0,0) corresponds to center of grid.
+    //  (x,y) offset of (0,0) corresponds to center of grid.
     patternNumbers.xOffset = (xCenterConstraint / 2) - Math.floor(xCenterConstraint * Math.random());
     patternNumbers.yOffset = (yCenterConstraint / 2) - Math.floor(yCenterConstraint * Math.random());
   
-    //  This prevents center of color wheel aligning too closely with center of grid
+    //  Center constraint prevents center of color wheel aligning too closely with center of grid
     if (Math.abs(patternNumbers.xOffset) < MAX_WIDTH / 10){
         while(Math.abs(patternNumbers.yOffset) < MAX_HEIGHT / 10){
             patternNumbers.yOffset = (yCenterConstraint / 2) 
                     - Math.floor(yCenterConstraint * Math.random());
         }
     }
-  
     patternNumbers.hueOriginAngle = 360 * Math.random();
-    patternNumbers.hueOriginal = 360 * Math.random();
 }
 
+/***
+*   Fill values in flipsForThisLevel object with new axes and directions
+*   Level number corresponds to number of axis & direction pairs
+**/
 function setRandomFlips(levelNumber) {
     flipsForThisLevel = {};
     console.log("Setting flips for level " + levelNumber);
@@ -166,18 +158,51 @@ function setRandomFlips(levelNumber) {
             "direction" : direction,
             "axis" : axis
         };
+        for(var j = 0, j <= i, j++){
+            /*
+            if( ****   Test if the flip has already been done.   ****){
+            i--;
+            break;
+            }
+            */
+        }
     }
     console.log(flipsForThisLevel);
 }
 
-function makeArray() {   
+/***
+*   Mix up puzzleObj based on the flipsForThisLevel
+**/
+function mixUpPuzzle() {
+    for(var i = 0; i < levelNumber; i++){
+		var flip = flipsForThisLevel[i];
+		console.log(flip);
+		if(flip.direction === "horiz"){
+			flipHorizAtAxis(flip.axis);
+			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
+		} else if(flip.direction === "vert"){
+			flipVertAtAxis(flip.axis);
+			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
+		} else {
+			console.log("Error, direction = " + flip.direction);
+		}        
+    }
+}
+
+/***
+*   Fill puzzleObj with Square objects
+*   Traits of Square objects are defined by patternNumbers object
+**/
+function makePuzzleObject() {   
     for(var i = 0; i < MAX_HEIGHT; i++){
         for(var j = 0; j < MAX_WIDTH; j++){
             var newSquareObj = {};
-      
+            //  Turn (i,j) coordinates into Cartesian (x,y) coordinates
             var xNewSquare = j - (MAX_WIDTH / 2) + patternNumbers.xOffset;
             var yNewSquare = (MAX_HEIGHT / 2) - i + patternNumbers.yOffset;
+            //  Calculate length of radius between square and center of pattern
             var hypotenuse = Math.sqrt(xNewSquare * xNewSquare + yNewSquare * yNewSquare);
+            //  Calculate angle square forms with center of puzzle
             var sinNewSquare = (yNewSquare / hypotenuse) || 0;
             var arcsinNewSquare = Math.asin(sinNewSquare);
             var angleRad = arcsinNewSquare;
@@ -187,19 +212,21 @@ function makeArray() {
             if (angleRad < 0) {
                 angleRad = 2*Math.PI + angleRad;
             }
-            
             var angleDeg = (angleRad * 360) / (2 * Math.PI);
+            //  Set Hue value to angle, adjusted for origin angle of this level
             var newHue = angleDeg + patternNumbers.hueOriginAngle;
             if (newHue > 360){
                 newHue = newHue - 360;
             }
-            
+            //  Calculate adjusted radius, which goes up and down as actual radius increases
+            //  This makes "bullseye" effect of light and dark rings           
             var adjustedHypotenuse = hypotenuse % (2 * lightnessRadius);
             var lightnessRatio = 
                     (Math.abs(lightnessRadius - adjustedHypotenuse)) / lightnessRadius;
+            //  Set Lightness value based on CONSTANT_VARIABLES
             var newLightness = 
-                    MIN_LIGHTNESSS + lightnessRatio * (MAX_LIGHTNESSS - MIN_LIGHTNESSS);
-            
+                    MIN_LIGHTNESSS + lightnessRatio * (MAX_LIGHTNESSS - MIN_LIGHTNESSS);  
+            //  Set traits of Square object          
             newSquareObj.hslColor = "hsl(" + newHue + ", 100%, " + newLightness + "%)";
             newSquareObj.winningI = i;
             newSquareObj.winningJ = j;
@@ -208,9 +235,13 @@ function makeArray() {
     }
 }
 
+/***
+*   Draw a new grid of HTML colored squares in the browser
+*   Add a "mousedown" listener to each square that records its axis when it is clicked
+*   After drawing puzzle calls checkForWin to see if current puzzle arrangement is correct
+**/
 function drawPuzzle(){
-    puzzleFlip.innerHTML = null;
-    
+    puzzleFlip.innerHTML = null;    
     for(var i = 0; i < MAX_HEIGHT; i++){
         var newRow = document.createElement("DIV");
         newRow.classList.add("rowStyle");
@@ -233,7 +264,7 @@ function drawPuzzle(){
         }         
         puzzleFlip.appendChild(newRow);
     }
-    if(checkForWin()){
+    if(checkForWin()){  //  This could be put in its own function
         if(saveDataForm){
             executePuzzleForm();
         } else {
@@ -248,20 +279,111 @@ function drawPuzzle(){
         document.removeEventListener("click", goToNextLevel);
     }
 }
+//  END OF CREATE PUZZLE FUNCTIONS
 
+
+/*****
+***     FLIP PUZZLE FUNCTIONS
+***
+******/
+/***
+*   Calls appropriate function based on vertical or horizontal direction
+*   and removes event listener from flip button so no other moves can be made
+*   until there is a new selection
+**/
+function executeFlip(){
+    if (directionToFlip === "horiz"){
+        flipHorizAtAxis(axisHoriz);        
+    } else if (directionToFlip === "vert"){
+        flipVertAtAxis(axisVert);
+    } else {
+        console.log("Error! directionToFlip = "+directionToFlip);
+    }
+    btnFlip.removeEventListener("click", executeFlip);
+    //console.log("Remove event listener from flip button.");
+}
+
+/***
+*   Vertically flips squares in the puzzleObj that are beyond the selected axisNumber
+**/
+function flipVertAtAxis(axisNumber) {
+    if (axisNumber > 0) {
+		//var axisNumber = parseInt(inputAxisNumber.value, 10);
+		console.log("Flip Vertical at axis "+axisNumber);
+		var maxI = MAX_HEIGHT -1;
+		var saveSquare;
+		for (var i = 0; i <= MAX_HEIGHT / 2; i++){
+			for (var j = axisNumber; j < MAX_WIDTH; j++){
+				saveSquare = puzzleObj[i][j];
+				puzzleObj[i][j] = puzzleObj[maxI - i][j];
+				puzzleObj[maxI - i][j] = saveSquare;
+			}
+		}
+		drawPuzzle();
+		clearSelection();
+    } else {
+        clearSelection();
+        //displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
+    }
+}
+
+/***
+*   Horizontally flips squares in the puzzleObj that are beyond the selected axisNumber
+**/
+function flipHorizAtAxis(axisNumber) {
+    if (axisNumber > 0) {
+		console.log("Flip Horizontal at axis "+axisNumber);
+		var maxJ = MAX_WIDTH -1;
+		var saveSquare;
+		for (var i = axisNumber; i < MAX_HEIGHT; i++){
+			for (var j = 0; j < MAX_WIDTH / 2; j++){
+				saveSquare = puzzleObj[i][j];
+				puzzleObj[i][j] = puzzleObj[i][maxJ - j];
+				puzzleObj[i][maxJ - j] = saveSquare;
+			}
+		}
+		drawPuzzle();
+		clearSelection();
+    } else {
+        clearSelection();
+        //displayFlip.innerHTML = "Anchor Square (top left) cannot be flipped";
+    }
+}
+//  END OF FLIP PUZZLE FUNCTIONS
+
+
+/*****
+***     START LEVEL AND FINISH LEVEL FUNCTIONS
+***
+******/
+/***
+*   Start a brand new game from Level 1
+**/
+function startGame(){
+    levelNumber = 1;
+    startNewLevel(levelNumber);
+}
+
+/***
+*   Keeping same values in patternNumbers and flipsForThisLevel, recreates current level
+*   as it was initially presented.  Adds 1 to the "resets" statistic
+**/
 function resetPuzzle(){
-    console.log(puzzleObj);
-    makeArray();
+    //console.log(puzzleObj);
+    makePuzzleObject();
     mixUpPuzzle()
     drawPuzzle();
     resetTimer();
     resets++;
 }
 
+/***
+*   Start a new level with the number of flips corresponding to the levelNumber
+**/
 function startNewLevel(levelNumber) {
 	setRandomPattern();
 	setRandomFlips(levelNumber);
-	makeArray();
+	makePuzzleObject();
 	mixUpPuzzle();
 	drawPuzzle();
 	levelLabel.innerHTML = "Level " + levelNumber;
@@ -272,11 +394,17 @@ function startNewLevel(levelNumber) {
 			'Click "Flip" to flip your selection.';
 }
 
+/***
+*   Increase the level number and start a new level
+**/
 function goToNextLevel(){
     levelNumber += 1;
     startNewLevel(levelNumber);
 }
 
+/***
+*   Set value for each form input to corresponding variable from level, and submit form
+**/
 function executePuzzleForm(){
     //
     clearInterval(timerId);
@@ -293,23 +421,11 @@ function executePuzzleForm(){
     saveDataForm.submit();
 }
 
-function mixUpPuzzle() {
-    for(var i = 0; i < levelNumber; i++){
-		var flip = flipsForThisLevel[i];
-		console.log(flip);
-		if(flip.direction === "horiz"){
-			flipHorizAtAxis(flip.axis);
-			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
-		} else if(flip.direction === "vert"){
-			flipVertAtAxis(flip.axis);
-			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
-		} else {
-			console.log("Error, direction = " + flip.direction);
-		}        
-    }
-}
-
-
+/***
+*   Loop through each square object in puzzleObj, if any of their current coordinates
+*   do not match the winning coordinates, then return FALSE
+*   If all squares pass this test at end of loop, then return TRUE
+**/
 function checkForWin() {
     for (var i = 0; i < MAX_HEIGHT; i++){
         for (var j = 0; j < MAX_HEIGHT; j++){
@@ -317,67 +433,35 @@ function checkForWin() {
                 return false;
             }
         }
-    }    
-    
+    }        
     return true;
 }
+//  END OF START LEVEL AND FINISH LEVEL FUNCTIONS
 
-var xMouseDown;
-var yMouseDown;
-var xMouseUp;
-var yMouseUp;
 
-/*
-Sources:
-    https://developer.mozilla.org/en-US/docs/Web/Events/mousedown
-    https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/screenX
-*/
-//document.addEventListener("mousedown", function (evt) {
-puzzleFlip.addEventListener("mousedown", function (evt) {
-    evt.preventDefault();
-    xMouseDown = evt.screenX;
-    yMouseDown = evt.screenY;
-    console.log("mousedown at screen coordinates (" + xMouseDown + "," + yMouseDown + ")");
-});
-
-//  Using document creates a bizzarre bug where it always flips horizontally. Why?
-//document.addEventListener("mouseup", function (evt) {
-puzzleFlip.addEventListener("mouseup", function (evt) {
-    xMouseUp = evt.screenX;
-    yMouseUp = evt.screenY;
-    if(testSelection()){
-        btnFlip.addEventListener("click", executeFlip);
-        console.log("Add event listener to flip button. directionToFlip="+directionToFlip);
-        addHighlights();
-    } else {
-    
-        //  At the moment this is done in the testSelection function, 
-        //  but it probably should be separated out.
-        
-        //btnFlip.removeEventListener("click", executeFlip);
-        //console.log("Remove event listener from flip button.");
-    }
-});
-
-btnReset.addEventListener("click", resetPuzzle);
-
-//  Screen coordinates, 
-//  AKA Right corresponds to X increasing and Down corresponds to Y increasing
-//
-//  What is minimum for deltaX or deltaY?  Play with this and find sweet spot.
-function testSelection() {
-    console.log("Test selection");	
+/*****
+***     SELECTION AND HIGHLIGHTING FUNCTIONS
+***
+******/
+/***
+*   Test vector of click and drag to see if it is valid selection
+*   Returns TRUE and sets directionToFlip if it is valid selection
+*   Returns FALSE and clears any current selection if it is not valid
+*   Note: uses Screen coordinates
+*   Right corresponds to X increasing, and Down corresponds to Y increasing
+**/
+function testSelection() {	
 	removeHighlights();
 	var deltaX = xMouseUp - xMouseDown;
 	var deltaY = yMouseUp - yMouseDown;
-	console.log("deltaX="+deltaX+" ,deltaY="+deltaY);
-	if(deltaX >= 20 && Math.abs(deltaX/deltaY) > 2){
+	//console.log("deltaX="+deltaX+" ,deltaY="+deltaY);
+	if(deltaX >= MIN_MOUSE_DRAG && Math.abs(deltaX/deltaY) > SELECT_ANGLE_RATIO){
 	    if(axisVert > 0){
 			console.log("Selected from vertical axis "+axisVert);
 			directionToFlip = "vert";
 			return true;
 		}
-	} else if(deltaY >= 20 && Math.abs(deltaY/deltaX) > 2){
+	} else if(deltaY >= MIN_MOUSE_DRAG && Math.abs(deltaY/deltaX) > SELECT_ANGLE_RATIO){
 	    if(axisHoriz > 0){
 			console.log("Selected from horizontal axis "+axisHoriz);
 			directionToFlip = "horiz";
@@ -388,6 +472,10 @@ function testSelection() {
 	return false;
 }
 
+/***
+*   Reset selection variables, remove event listener that allows flips, and remove 
+*   highlights from selected squares in grid
+**/
 function clearSelection() {
     directionToFlip = null;
     axisHoriz = null;
@@ -397,11 +485,14 @@ function clearSelection() {
     removeHighlights();
 }
 
+/***
+*   Go through Array of squares, startin from axis of selection and add .highlight class
+**/
 function addHighlights() {
     if (directionToFlip == "vert") {
         for (var i = 0; i < MAX_HEIGHT; i++) {
             for (var j = axisVert; j < MAX_WIDTH; j++) {
-                console.log("i="+i+",j="+j+",squareArray[i][j]="+squareArray[i][j]);
+                //console.log("i="+i+",j="+j+",squareArray[i][j]="+squareArray[i][j]);
                 squareArray[i][j].classList.add("highlight");             
             }
         }
@@ -416,6 +507,9 @@ function addHighlights() {
     }
 }
 
+/***
+*   Go through Array of all squares and remove .highlight class
+**/
 function removeHighlights() {
    for (var i = 0; i < MAX_HEIGHT; i++) {
 		for (var j = 0; j < MAX_WIDTH; j++) {
@@ -423,7 +517,16 @@ function removeHighlights() {
 		}
 	}
 }
+//  END OF SELECTION AND HIGHLIGHTING FUNCTIONS
 
+
+/*****
+***     TIMER FUNCTIONS
+***
+******/
+/***
+*   Start a brand new timer with current time and total time both starting from 0
+**/
 function startNewTimer(){
     clearTimer()
     timer = 0;
@@ -434,10 +537,11 @@ function startNewTimer(){
 	},1000);
 }
 
-
+/***
+*   Stop current timer, add current time to total time, and start a new current timer
+**/
 function resetTimer(){
     totalTime += timer;
-    console.log(totalTime);
     timer = 0;
     clearTimer();
     timerId = setInterval(function(){
@@ -446,14 +550,17 @@ function resetTimer(){
 	},1000);
 }
 
+/***
+*   Stop timer from counting up, and clear text from clock HTML span
+**/
 function clearTimer(){
     clearInterval(timerId);
     timerSpan.textContent = null;
 }
 
-
-
-//  Return time in seconds to a formatted string in minutes and seconds.
+/***
+*   Return a time in seconds to a formatted string in minutes and seconds.
+**/  
 function formatTime(t){
 	var minutes = Math.floor(t / 60);
 	var seconds = (t % 60).toString();
@@ -462,13 +569,9 @@ function formatTime(t){
 	}
 	return minutes + ":" + seconds;
 }
+//  END OF TIMER FUNCTIONS
 
 
-
-function startGame(){
-    levelNumber = 1;
-    startNewLevel(levelNumber);
-}
 
 startGame();
 

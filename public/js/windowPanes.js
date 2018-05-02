@@ -272,7 +272,7 @@ function drawPuzzle(){
         }         
         puzzleFlip.appendChild(newRow);
     }
-    if(checkForWin()){  //  This could be put in its own function
+    if(checkForWin()){
         finishLevel();        
     } else {
         document.removeEventListener("click", goToNextLevel);
@@ -307,11 +307,10 @@ function executeFlip(){
 **/
 function flipVertAtAxis(axisNumber) {
     if (axisNumber > 0) {
-		//var axisNumber = parseInt(inputAxisNumber.value, 10);
 		console.log("Flip Vertical at axis "+axisNumber);
 		var maxI = MAX_HEIGHT -1;
 		var saveSquare;
-		for (var i = 0; i <= MAX_HEIGHT / 2; i++){
+		for (var i = 0; i < MAX_HEIGHT / 2; i++){
 			for (var j = axisNumber; j < MAX_WIDTH; j++){
 				saveSquare = puzzleObj[i][j];
 				puzzleObj[i][j] = puzzleObj[maxI - i][j];

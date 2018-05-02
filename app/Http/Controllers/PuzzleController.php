@@ -38,6 +38,9 @@ class PuzzleController extends Controller
         $puzzle->total_solve_time = $request->total_solve_time;
         $puzzle->pattern_json = $request->pattern_json;
         $puzzle->level_json = $request->level_json;
+        $puzzle->puzzle_resets = $request->puzzle_resets;
+        $puzzle->number_flips = $request->number_flips;
+        $puzzle->total_number_flips = $request->total_number_flips;
         
         $puzzle->user_id = $user->id;
         
@@ -46,4 +49,3 @@ class PuzzleController extends Controller
         return redirect('/play');
 	}
 }
-

@@ -22,6 +22,9 @@ class CreatePuzzlesTable extends Migration
             $table->integer('total_solve_time');
             $table->text('pattern_json');
             $table->text('level_json');
+            $table->integer('puzzle_resets');
+            $table->integer('number_flips');
+            $table->integer('total_number_flips');
         });
     }
 

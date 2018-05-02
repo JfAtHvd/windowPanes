@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             
             //  My additions:
             $table->integer('highest_level')->nullable();
-            $table->string('fastest_times_json')->nullable();
+            $table->text('fastest_times_json')->nullable();
             
             $table->rememberToken();
             $table->timestamps();

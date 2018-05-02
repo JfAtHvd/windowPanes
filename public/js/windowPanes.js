@@ -40,7 +40,7 @@ for (var i = 0; i < MAX_HEIGHT; i++){
 var patternNumbers = {
     "xOffset" : null,
     "yOffset" : null,
-    "hueOriginAngle" : null,
+    "hueOriginAngle" : null
 };
 
 var flipsForThisLevel = {};
@@ -59,7 +59,9 @@ var levelNumber;
 var timer;
 var totalTime;
 var timerId;
-var resets;
+var puzzleResets;
+var numberFlips;
+var totalNumberFlips;
 
 /***
 *   References to HTML elements:
@@ -74,17 +76,19 @@ var winReport = document.getElementById("winReport");
 //  HTML form and its inputs:
 var saveDataForm = document.getElementById("saveDataForm");
 var level = document.getElementById("level");
+var level_json = document.getElementById("level_json");
+var pattern_json = document.getElementById("pattern_json");
 var solve_time = document.getElementById("solve_time");
 var total_solve_time = document.getElementById("total_solve_time");
-var pattern_json = document.getElementById("pattern_json");
-var level_json = document.getElementById("level_json");
+var puzzle_resets = document.getElementById("puzzle_resets");
+var number_flips = document.getElementById("number_flips");
+var total_number_flips = document.getElementById("total_number_flips");
 //  This HTML div will exist if user is logged in, but will be undefined if not
 var userLoginTrue = document.getElementById("userLoginTrue");
 //  This HTML div will exist if user is redirected from home page, 
 //  but will be undefined if user is redirected from within game
 var newGameTrue = document.getElementById("newGameTrue");
 //  END OF VARIABLE DECLARATIONS
-
 
 /***
 *   ADD EVENT LISTENERS TO HTML ELEMENTS
@@ -291,6 +295,7 @@ function drawPuzzle(){
 *   until there is a new selection
 **/
 function executeFlip(){
+    numberFlips++;
     if (directionToFlip === "horiz"){
         flipHorizAtAxis(axisHoriz);        
     } else if (directionToFlip === "vert"){
@@ -299,7 +304,6 @@ function executeFlip(){
         console.log("Error! directionToFlip = "+directionToFlip);
     }
     btnFlip.removeEventListener("click", executeFlip);
-    //console.log("Remove event listener from flip button.");
 }
 
 /***
@@ -376,14 +380,17 @@ function loadGame(){
 
 /***
 *   Recreates current level as it was initially presented, keeping same values in 
-*   patternNumbers and flipsForThisLevel,   Adds 1 to the "resets" statistic
+*   patternNumbers and flipsForThisLevel,   Adds 1 to the "puzzleResets" statistic,
+*   Sets numberFlips to 0 but retains it in totalNumberFlips
 **/
 function resetPuzzle(){
     makePuzzleObject();
     mixUpPuzzle()
     drawPuzzle();
     resetTimer();
-    resets++;
+    puzzleResets++;
+    totalNumberFlips += numberFlips;
+    numberFlips = 0;
 }
 
 /***
@@ -397,10 +404,11 @@ function startNewLevel(levelNumber) {
 	drawPuzzle();
 	levelLabel.innerHTML = "Level " + levelNumber;
     startNewTimer();
-    resets = 0;
+    puzzleResets = 0;
+    numberFlips = 0;
+    totalNumberFlips = 0;
     gameControls.style.visibility = "visible";
-    winReport.textContent = 'Click and drag within grid of colored squares to select an area.'+
-			'Click "Flip" to flip your selection.';
+    winReport.style.visibility = "hidden";
 }
 
 /***
@@ -414,18 +422,18 @@ function goToNextLevel(){
 
 /***
 *   Set value for each form input to corresponding variable from level, and submit form
+*   Passes number for next level into localStorage
 **/
 function executePuzzleForm(){
-    clearInterval(timerId);
     level.value = levelNumber;
-    solve_time.value = timer;
-    if(totalTime == 0){
-        total_solve_time.value = timer;
-    } else {
-        total_solve_time.value = totalTime + timer;
-    }
-    pattern_json.value = JSON.stringify(patternNumbers);
     level_json.value = JSON.stringify(flipsForThisLevel);
+    pattern_json.value = JSON.stringify(patternNumbers);
+    solve_time.value = timer;
+    total_solve_time.value = totalTime;
+    puzzle_resets.value = puzzleResets;
+    number_flips.value = numberFlips;
+    total_number_flips.value = totalNumberFlips;
+    
     levelNumber += 1;
     localStorage.setItem('levelNumber', levelNumber);
     saveDataForm.submit();
@@ -448,14 +456,18 @@ function checkForWin() {
 }
 
 /***
-*   If checkForWin is true, display times/scores, determine if user is logged in and 
-*   proceed to next level accordingly
+*   Called when checkForWin is true, display times/scores, 
+*   determine if user is logged in and proceed to next level accordingly
 **/
 function finishLevel(){
+    clearInterval(timerId);
+    totalTime += timer;
+    totalNumberFlips += numberFlips;
     gameControls.style.visibility = "hidden";
-	winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+
-	        formatTime(totalTime)+"\nNumber of resets: "+
-			resets+"\nClick anywhere to proceed to next level...";
+	winReport.style.visibility = "visible";
+	winReport.textContent = "You completed Level " + levelNumber + " in " + 
+	        formatTime(totalTime) +" using " + puzzleResets + " resets!" +
+	        "\nClick anywhere to proceed to next level...";
 	if(userLoginTrue){
 		setTimeout(function(){
 			document.addEventListener("click", executePuzzleForm);

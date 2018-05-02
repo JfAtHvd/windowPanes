@@ -56,7 +56,8 @@ class PuzzleController extends Controller
         
         $timeStr = $user->fastest_times_json;
         $fastestTimes = explode(",", $user->fastest_times_json);
-        if(!array_key_exists ($thisLevel - 1, $fastestTimes)  || 
+        if(!array_key_exists(($thisLevel - 1), $fastestTimes)  ||
+                $fastestTimes[$thisLevel - 1] == ""  || 
                 $totalSolveTime < $fastestTimes[$thisLevel - 1]){
             $fastestTimes[$thisLevel - 1] = $totalSolveTime;
             $timeStr = $fastestTimes[0];

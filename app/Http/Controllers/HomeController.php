@@ -27,7 +27,23 @@ class HomeController extends Controller
     {
         if(Auth::user()){
             $user = Auth::user();
-            return view('home')->with(['user' => $user]);
+            $timesStr = $user->fastest_times_json;
+            $fastestTimes = explode(",", $timesStr);
+            if($fastestTimes[0] != ""){
+                for($i = 0; $i < sizeof($fastestTimes); $i++){
+                    $t = $fastestTimes[$i];
+                    $minutes = floor(((int)$t / 60));
+					$seconds = (string)((int)$t % 60);
+					if(strlen($seconds)  == 1){
+						$seconds = "0".$seconds;
+					}
+					$fastestTimes[$i] = $minutes.":".$seconds;
+                }
+            }
+            return view('home')->with([
+                'user' => $user,
+                'fastestTimes' => $fastestTimes
+            ]);
         } else {
             return view('home');
         }

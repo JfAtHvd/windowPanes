@@ -354,7 +354,7 @@ function flipHorizAtAxis(axisNumber) {
 ******/
 /***
 *   Load game screen.  
-*   If user is not logged in, always starts from level one and same page increments levels
+*   If user is not logged in, always starts from level one. Same page increments levels
 *   If user logged in and starting new game, start from level one and clear localStorage
 *   If user logged in and not starting new game, pull level number from localStorage
 **/
@@ -446,17 +446,19 @@ function checkForWin() {
 }
 
 /***
-*   If checkForWin is true, determine if user is logged in and proceed to next level 
-*   accordingly
+*   If checkForWin is true, display times/scores, determine if user is logged in and 
+*   proceed to next level accordingly
 **/
 function finishLevel(){
-    if(userLoginTrue){
-		console.log(levelNumber);
-		executePuzzleForm();
-	} else {
-		gameControls.style.visibility = "hidden";
-		winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+formatTime(totalTime)+"\nNumber of resets: "+
-				resets+"\nClick anywhere to proceed to next level...";
+    gameControls.style.visibility = "hidden";
+	winReport.textContent = "Complete! \n Time: " + formatTime(timer) +"\nTotal time: "+
+	        formatTime(totalTime)+"\nNumber of resets: "+
+			resets+"\nClick anywhere to proceed to next level...";
+	if(userLoginTrue){
+		setTimeout(function(){
+			document.addEventListener("click", executePuzzleForm);
+		}, 500);
+	} else {		
 		setTimeout(function(){
 			document.addEventListener("click", goToNextLevel);
 		}, 500);        

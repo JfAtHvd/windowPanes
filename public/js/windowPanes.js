@@ -163,13 +163,16 @@ function setRandomFlips(levelNumber) {
             "direction" : direction,
             "axis" : axis
         };
-        for(var j = 0; j <= i; j++){
-            /*
-            if( ****   Test if the flip has already been done.   ****){
-            i--;
-            break;
+        for(var j = 0; j < i; j++){
+            if(flipsForThisLevel[i].direction == flipsForThisLevel[j].direction &&
+                    flipsForThisLevel[i].axis == flipsForThisLevel[j].axis){
+				
+				console.log("Repeat flip: " + flipsForThisLevel[i].direction + " " + flipsForThisLevel[j].direction +
+                    " , " + flipsForThisLevel[i].axis + " " + flipsForThisLevel[j].axis);
+                console.log("i= " + i + ", j= " + j);
+                i--;
+				break;
             }
-            */
         }
     }
     console.log(flipsForThisLevel);

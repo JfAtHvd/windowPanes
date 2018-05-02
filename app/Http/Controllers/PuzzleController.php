@@ -33,9 +33,12 @@ class PuzzleController extends Controller
         $user = Auth::user();
         $puzzle = new Puzzle();
         
-        $puzzle->level = $request->level;
+        $thisLevel = $request->level;
+        $totalSolveTime = $request->total_solve_time;
+        
+        $puzzle->level = $thisLevel;
         $puzzle->solve_time = $request->solve_time;
-        $puzzle->total_solve_time = $request->total_solve_time;
+        $puzzle->total_solve_time = $totalSolveTime;
         $puzzle->pattern_json = $request->pattern_json;
         $puzzle->level_json = $request->level_json;
         $puzzle->puzzle_resets = $request->puzzle_resets;
@@ -45,6 +48,25 @@ class PuzzleController extends Controller
         $puzzle->user_id = $user->id;
         
         $puzzle->save();
+        
+        $highestLevel = $user->highest_level;
+        if(!$highestLevel || $thisLevel > $highestLevel){
+            $user->highest_level = $thisLevel;
+        }
+        
+        $timeStr = $user->fastest_times_json;
+        $fastestTimes = explode(",", $user->fastest_times_json);
+        if(!array_key_exists ($thisLevel - 1, $fastestTimes)  || 
+                $totalSolveTime < $fastestTimes[$thisLevel - 1]){
+            $fastestTimes[$thisLevel - 1] = $totalSolveTime;
+            $timeStr = $fastestTimes[0];
+            for($i = 1; $i < sizeof($fastestTimes); $i++){
+                $timeStr = $timeStr.",".$fastestTimes[$i];
+            }
+            $user->fastest_times_json = $timeStr;
+        }
+        
+        $user->save();
         
         return redirect('/play');
 	}

@@ -9,6 +9,8 @@
 //  Can be adjusted as necessary
 var MAX_WIDTH = 16;
 var MAX_HEIGHT = 16;
+var MAX_SATURATION = 100;
+var MIN_SATURATION = 20;
 var MAX_LIGHTNESSS = 80;
 var MIN_LIGHTNESSS = 23;
 var MIN_MOUSE_DRAG = 20;
@@ -230,6 +232,10 @@ function makePuzzleObject() {
             if (newHue > 360){
                 newHue = newHue - 360;
             }
+            var maxDiagonal = Math.sqrt(MAX_HEIGHT * MAX_HEIGHT + MAX_WIDTH * MAX_WIDTH);
+            var saturationRatio = hypotenuse / maxDiagonal;
+            var newSaturation = 
+                    MAX_SATURATION - saturationRatio * (MAX_SATURATION - MIN_SATURATION);
             //  Calculate adjusted radius, which goes up and down as actual radius increases
             //  This makes "bullseye" effect of light and dark rings           
             var adjustedHypotenuse = hypotenuse % (2 * lightnessRadius);
@@ -237,9 +243,10 @@ function makePuzzleObject() {
                     (Math.abs(lightnessRadius - adjustedHypotenuse)) / lightnessRadius;
             //  Set Lightness value based on CONSTANT_VARIABLES
             var newLightness = 
-                    MIN_LIGHTNESSS + lightnessRatio * (MAX_LIGHTNESSS - MIN_LIGHTNESSS);  
+                    MIN_LIGHTNESSS + lightnessRatio * (MAX_LIGHTNESSS - MIN_LIGHTNESSS);
             //  Set traits of Square object          
-            newSquareObj.hslColor = "hsl(" + newHue + ", 100%, " + newLightness + "%)";
+            newSquareObj.hslColor = 
+                    "hsl(" + newHue + ", " + newSaturation + "%, " + newLightness + "%)";
             newSquareObj.winningI = i;
             newSquareObj.winningJ = j;
             puzzleObj[i][j] = newSquareObj;

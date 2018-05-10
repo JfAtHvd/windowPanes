@@ -123,6 +123,61 @@ btnReset.addEventListener("click", resetPuzzle);
 
 
 /*****
+***     CONSTRUCTOR FUNCTIONS
+***
+******/
+/***
+*   Create a new instance of a Square object which contains data for HSL color, winning
+*   i coordinate, winning j coordinate
+**/
+function Square() {
+    if(this instanceof Square){
+        var hslColor;
+        var winningI;
+        var winningJ;
+    } else {
+        return new Square();
+    }
+}
+/***
+*   Add methods to Square prototype, more efficient to do this once that every
+*   Square object can reference, rather than have these methods duplicated on every single
+*   Square object
+**/
+Square.prototype = {
+    constructor: Square,
+    
+    getHslColor: function() {
+        return this.hslColor;
+    },
+    
+    getWinningI: function() {
+        return this.winningI;
+    },
+    
+    getWinningJ: function() {
+        return this.winningJ;
+    },
+    
+    setHslColor: function(color) {
+        this.hslColor = color;
+    },
+    
+    setWinningI: function(i) {
+        this.winningI = i;
+    },
+    
+    setWinningJ: function(j) {
+        this.winningJ = j;
+    },
+    
+    toString: function() {
+        return "[Square hslColor:" + this.hslColor + " winningI:" + this.winningI 
+                + " winningJ:" + this.winningJ + "]";
+    }
+};
+
+/*****
 ***     CREATE PUZZLE FUNCTIONS
 ***
 ******/
@@ -210,7 +265,7 @@ function mixUpPuzzle() {
 function makePuzzleObject() {   
     for(var i = 0; i < MAX_HEIGHT; i++){
         for(var j = 0; j < MAX_WIDTH; j++){
-            var newSquareObj = {};
+            var newSquareObj = new Square();
             //  Turn (i,j) coordinates into Cartesian (x,y) coordinates
             var xNewSquare = j - (MAX_WIDTH / 2) + patternNumbers.xOffset;
             var yNewSquare = (MAX_HEIGHT / 2) - i + patternNumbers.yOffset;
@@ -245,10 +300,10 @@ function makePuzzleObject() {
             var newLightness = 
                     MIN_LIGHTNESSS + lightnessRatio * (MAX_LIGHTNESSS - MIN_LIGHTNESSS);
             //  Set traits of Square object          
-            newSquareObj.hslColor = 
-                    "hsl(" + newHue + ", " + newSaturation + "%, " + newLightness + "%)";
-            newSquareObj.winningI = i;
-            newSquareObj.winningJ = j;
+            newSquareObj.setHslColor( 
+                    "hsl(" + newHue + ", " + newSaturation + "%, " + newLightness + "%)");
+            newSquareObj.setWinningI(i);
+            newSquareObj.setWinningJ(j);
             puzzleObj[i][j] = newSquareObj;
         }
     }
@@ -269,7 +324,7 @@ function drawPuzzle(){
             squareArray[i][j] = newSquare;
             newSquare.setAttribute("class", "squareStyle");
             newSquare.setAttribute("id", i+","+j);
-            newSquare.style.backgroundColor = puzzleObj[i][j].hslColor;
+            newSquare.style.backgroundColor = puzzleObj[i][j].getHslColor();
             newRow.appendChild(newSquare);
             (function(){
 				var axisHorizSelected = i;
@@ -454,7 +509,7 @@ function executePuzzleForm(){
 function checkForWin() {
     for (var i = 0; i < MAX_HEIGHT; i++){
         for (var j = 0; j < MAX_HEIGHT; j++){
-            if(puzzleObj[i][j].winningI != i || puzzleObj[i][j].winningJ != j){
+            if(puzzleObj[i][j].getWinningI() != i || puzzleObj[i][j].getWinningJ() != j){
                 return false;
             }
         }

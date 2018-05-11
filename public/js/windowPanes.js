@@ -101,7 +101,7 @@ puzzleFlip.addEventListener("mousedown", function (evt) {
     evt.preventDefault();
     xMouseDown = evt.screenX;
     yMouseDown = evt.screenY;
-    console.log("mousedown at screen coordinates (" + xMouseDown + "," + yMouseDown + ")");
+    //console.log("mousedown at screen coordinates (" + xMouseDown + "," + yMouseDown + ")");
 });
 
 puzzleFlip.addEventListener("mouseup", function (evt) {
@@ -176,9 +176,10 @@ Square.prototype = {
                 + " winningJ:" + this.winningJ + "]";
     }
 };
+//  END OF CONSTRUCTOR FUNCTIONS
 
 /*****
-***     CREATE PUZZLE FUNCTIONS
+***     PUZZLE CREATION FUNCTIONS
 ***
 ******/
 /***
@@ -245,13 +246,13 @@ function setRandomFlips(levelNumber) {
 function mixUpPuzzle() {
     for(var i = 0; i < levelNumber; i++){
 		var flip = flipsForThisLevel[i];
-		console.log(flip);
+		//console.log(flip);
 		if(flip.direction === "horiz"){
 			flipHorizAtAxis(flip.axis);
-			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
+			//console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
 		} else if(flip.direction === "vert"){
 			flipVertAtAxis(flip.axis);
-			console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
+			//console.log("Mix direction: " + flip.direction + ", axis: " + flip.axis);
 		} else {
 			console.log("Error, direction = " + flip.direction);
 		}        
@@ -315,7 +316,8 @@ function makePuzzleObject() {
 *   After drawing puzzle calls checkForWin to see if current puzzle arrangement is correct
 **/
 function drawPuzzle(){
-    puzzleFlip.innerHTML = null;    
+    puzzleFlip.innerHTML = null;
+    var rgbDuplicateTestArray = [];   
     for(var i = 0; i < MAX_HEIGHT; i++){
         var newRow = document.createElement("DIV");
         newRow.classList.add("rowStyle");
@@ -335,16 +337,24 @@ function drawPuzzle(){
 					axisVert = axisVertSelected;
 				});
             })();
+            var computedStyle = window.getComputedStyle(newSquare, null);
+            var thisRgbValue = computedStyle['background-color'];
+            if(rgbDuplicateTestArray.includes(thisRgbValue)){
+                console.log("Duplicate RGB color: " + thisRgbValue);
+            } else {
+                rgbDuplicateTestArray.push(thisRgbValue);
+            }
         }         
         puzzleFlip.appendChild(newRow);
     }
+    console.log("All RGB values: " + rgbDuplicateTestArray);
     if(checkForWin()){
         finishLevel();        
     } else {
         document.removeEventListener("click", goToNextLevel);
     }
 }
-//  END OF CREATE PUZZLE FUNCTIONS
+//  END OF PUZZLE CREATION FUNCTIONS
 
 
 /*****
@@ -585,7 +595,7 @@ function clearSelection() {
     axisHoriz = null;
     axisVert = null;
     btnFlip.removeEventListener("click", executeFlip);
-    console.log("Remove event listener from flip button.");
+    //console.log("Remove event listener from flip button.");
     removeHighlights();
 }
 

@@ -8,6 +8,7 @@
     
 	<div class="text-center">
 		<h2 id="levelLabel"></h2>
+		<p>Click and drag down or right to select, then press Flip to flip your selection</p>
 		<div id="puzzleFlip"></div>
 		<div id="winReport" class="alert-success"></div>
 		<div id="gameControls">

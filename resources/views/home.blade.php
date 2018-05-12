@@ -16,8 +16,9 @@
 				@endfor
 			@endif
 		@else
-			<a href="{{ action('PuzzleController@play') }}" class="btn btn-primary btn-lg">Play as Guest</a>
-			<h2>Link for Demo Video</h2>
+			<a href="{{ action('PuzzleController@play') }}" class="btn btn-primary btn-lg">Play as Guest</a><br/>
+			<h2>Watch a Demonstration Video</h2>
+			<iframe width="560" height="315" src="https://www.youtube.com/embed/grdeFnb8LAE?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 		@endif
     </div>
 @endsection

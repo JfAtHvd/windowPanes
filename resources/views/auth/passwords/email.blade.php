@@ -4,7 +4,7 @@
 <h2 class="text-center">Reset Password</h2>
 
 	@if (session('status'))
-		<div class="alert alert-success">
+		<div class="alert alert-success text-center">
 			{{ session('status') }}
 		</div>
 	@endif
@@ -13,7 +13,7 @@
 			<form method="POST" action="{{ route('password.email') }}">
 				{{ csrf_field() }}
 
-					<label for="email" class="col-md-4 control-label">E-Mail Address</label>
+					<label for="email" class="control-label">E-Mail Address</label>
 
 					<input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
 

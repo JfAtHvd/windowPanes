@@ -10,7 +10,7 @@
 
 				<p>* Required fields</p>
 
-				<label for="name" class="control-label">* Name</label>
+				<label for="name" class="control-label">* User Name</label>
 				<input id="name" type="text" name="name" value="{{ old('name') }}" class="form-control" required autofocus><br/>
 				@if($errors->has('name'))
 					<div class="error">{{ $errors->first('name') }}</div><br/>
